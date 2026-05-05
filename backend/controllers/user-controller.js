@@ -57,7 +57,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-export const loginUser = (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -68,18 +68,18 @@ export const loginUser = (req, res) => {
       });
     }
 
-    const user = await User.findOne({email})
+    const user = await User.findOne({ email });
 
-    if(!user){
+    if (!user) {
       return res.status(400).json({
         success: false,
         message: "User does't exists",
       });
     }
 
-    const isPassword = await bcrypt.compare(password , user.password)
+    const isPassword = await bcrypt.compare(password, user.password);
 
-    if(!isPassword){
+    if (!isPassword) {
       return res.status(400).json({
         success: false,
         message: "Password mismatch",
@@ -87,9 +87,6 @@ export const loginUser = (req, res) => {
     }
 
     //todo ---> CHECK IF USER IS VERIFIED OR NOT
-
-
-
   } catch (error) {
     console.log(error);
 
