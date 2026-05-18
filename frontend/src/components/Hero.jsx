@@ -2,20 +2,21 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../context/UserContext";
 import { FaBolt, FaArrowRight } from "react-icons/fa";
+import Loader from "./Loader";
 
 const Hero = () => {
   const { user } = getUser();
-  const navigate = useNavigate(); // uncomment if using router
+  const navigate = useNavigate();
 
   return (
     <div className="relative w-full h-screen md:h-175 bg-linear-to-br from-slate-50 to-gray-100 overflow-hidden flex items-center">
       <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Welcome Message */}
-          <h2 className="text-2xl font-bold text-gray-800">
-            Welcome {user?.username}
+          <h2 className="text-2xl font-bold text-gray-800 capitalize">
+            Welcome {user?.username} 
           </h2>
-
+<Loader />
           {/* Badge */}
           <div className="flex items-center gap-2 bg-blue-100 border border-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm">
             <FaBolt className="text-xs" />

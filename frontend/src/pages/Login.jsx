@@ -1,7 +1,48 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../config/axiosInstance";
+import { getUser } from "../context/UserContext";
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const navigate = useNavigate();
+  let { setUser } = getUser();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(formData);
+
+    try {
+      let resp = await api.post("/login", formData);
+      console.log(resp);
+      if (resp.data.success) {
+        navigate("/");
+
+        let userData = {
+          ...resp.data.user,
+          accessToken: resp.data.accessToken,
+          refreshToken: resp.data.refreshToken,
+        };
+        setUser(userData);
+        localStorage.setItem("userData", JSON.stringify(userData));
+        toast.success(resp.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.data.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-gray-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -31,6 +72,8 @@ const Login = () => {
                 name="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
               />
             </div>
 
@@ -48,6 +91,8 @@ const Login = () => {
                 name="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
               />
             </div>
 
@@ -61,6 +106,7 @@ const Login = () => {
             {/* Login button (no functionality) */}
             <button
               type="button"
+              onClick={handleSubmit}
               className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white font-medium py-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition cursor-pointer"
             >
               Sign in
