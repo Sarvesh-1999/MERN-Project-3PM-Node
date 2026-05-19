@@ -1,45 +1,38 @@
 import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
 import { api } from "../config/axiosInstance";
-import { getUser } from "../context/UserContext";
+import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-const Login = () => {
+const ChangePassword = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+  const { email } = useParams();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     let { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const navigate = useNavigate();
-  let { setUser } = getUser();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    if (formData.newPassword.trim() !== formData.confirmPassword.trim()) {
+      toast.error("Password mismatch");
+      return;
+    }
 
     try {
-      let resp = await api.post("/login", formData);
+      let resp = await api.post(`/confirm-password/${email}`, formData);
       console.log(resp);
       if (resp.data.success) {
-        navigate("/");
-
-        let userData = {
-          ...resp.data.user,
-          accessToken: resp.data.accessToken,
-          refreshToken: resp.data.refreshToken,
-        };
-        setUser(userData);
-        localStorage.setItem("userData", JSON.stringify(userData));
+        navigate("/login");
         toast.success(resp.data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.data.message);
     }
   };
 
@@ -52,27 +45,29 @@ const Login = () => {
         <div className="p-8">
           {/* Title */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Welcome back</h2>
-            <p className="text-gray-500 mt-2">Sign in to your account</p>
+            <h2 className="text-3xl font-bold text-gray-800">
+              Change Password
+            </h2>
+            <p className="text-gray-500 mt-2">create a new password</p>
           </div>
 
           {/* Form fields */}
           <div className="space-y-5">
-            {/* Email */}
+            {/* Password */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="newPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email address
+                New Password
               </label>
               <input
-                type="email"
-                id="email"
-                name="email"
+                type="password"
+                id="newPassword"
+                name="newPassword"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="you@example.com"
-                value={formData.email}
+                placeholder="••••••••"
+                value={formData.newPassword}
                 onChange={handleChange}
               />
             </div>
@@ -80,27 +75,20 @@ const Login = () => {
             {/* Password */}
             <div>
               <label
-                htmlFor="password"
+                htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Password
+                Confirm Password
               </label>
               <input
                 type="password"
-                id="password"
-                name="password"
+                id="confirmPassword"
+                name="confirmPassword"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 placeholder="••••••••"
-                value={formData.password}
+                value={formData.confirmPassword}
                 onChange={handleChange}
               />
-            </div>
-
-            {/* Forgot password link */}
-            <div className="text-right">
-              <Link to={"/forgot-password"} className="text-sm text-blue-600 hover:underline cursor-pointer">
-                Forgot password?
-              </Link>
             </div>
 
             {/* Login button (no functionality) */}
@@ -109,24 +97,13 @@ const Login = () => {
               onClick={handleSubmit}
               className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white font-medium py-2.5 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition cursor-pointer"
             >
-              Sign in
+              Update Password
             </button>
           </div>
-
-          {/* Extra text / signup link (just UI) */}
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?{" "}
-            <Link
-              to={"/signup"}
-              className="text-blue-600 hover:underline cursor-pointer"
-            >
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ChangePassword;

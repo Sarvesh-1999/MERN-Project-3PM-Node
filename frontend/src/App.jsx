@@ -8,6 +8,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import VerifyOTP from "./pages/VerifyOTP";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ChangePassword from "./pages/ChangePassword";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/verify-otp/:email",
     element: <VerifyOTP />,
+  },
+  {
+    path: "/change-password/:email",
+    element: <ChangePassword />,
   },
 ]);
 

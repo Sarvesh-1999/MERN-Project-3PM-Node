@@ -14,9 +14,8 @@ const Hero = () => {
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Welcome Message */}
           <h2 className="text-2xl font-bold text-gray-800 capitalize">
-            Welcome {user?.username} 
+            Welcome {user?.username}
           </h2>
-<Loader />
           {/* Badge */}
           <div className="flex items-center gap-2 bg-blue-100 border border-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm">
             <FaBolt className="text-xs" />
