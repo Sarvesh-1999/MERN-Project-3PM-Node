@@ -304,6 +304,8 @@ export const verifyOtp = async (req, res) => {
 
     user.otp = null;
     user.otpExpiry = null;
+    user.otpVerified=ture
+    user.verifiedOTPAt:Date.now()
     await user.save();
 
     return res.status(200).json({
@@ -321,6 +323,30 @@ export const verifyOtp = async (req, res) => {
 // confirm password
 export const confirmPassword = async (req, res) => {
   try {
+
+    // ! Sir, I think there is a serious bug in this as if some one try to do a post request with email without otp verification then also change the pass word
+    /*
+
+    example : request = http://localhost:PORT/confirm-password/xyz@gmail.com
+              body={
+                 newPassword:"12345678",
+                 confirmPassword:"12345678"
+              }
+
+              flow Sequence:
+              1. extract newPassword, confirmPassword from body
+              2. email from params
+              3. cheak for newPassword!==confirmPassword
+              4. find user with email then update password
+
+              Bug:
+              if anyone new the email of a user then he can change the password as there is no validation that otp is verified or not in this controller
+
+              Solution:
+              1. we need to add a field while verifing otp like email verified: ture, veriied at: date
+              2. then we need to cheak the emailverified is ture or not and if the window of time between otp verified and the current request if the time window is greater then 10 minutes then password change should rejected and redo the all process of change password
+    
+    */
     const { newPassword, confirmPassword } = req.body;
     const email = req.params.email;
 
@@ -345,6 +371,23 @@ export const confirmPassword = async (req, res) => {
         success: false,
         message: "User not found",
       });
+    }
+    if (!user.otpVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Otp is not Verified",
+      });
+    }
+
+    const now = Date.now();
+    const verifiedAt = new Date(user.verifiedOTPAt).getTime();
+    const tenMinutes = 10 * 60 * 1000;
+
+    if (now - verifiedAt > tenMinutes) {
+      user.otpVerified = false;
+      user.verifiedOTPAt = null;
+      await user.save();
+      thow new Error("Session expired. Please request a new OTP");
     }
 
     const salt = await bcrypt.genSalt(10);
